@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Felles huskeliste</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Nunito:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg:        #0f1117;
+  --surface:   #181c27;
+  --surface2:  #1f2436;
+  --border:    #2a3045;
+  --accent:    #4f9eff;
+  --accent2:   #7c5cfc;
+  --success:   #34d399;
+  --warning:   #fbbf24;
+  --danger:    #f87171;
+  --text:      #e8eaf0;
+  --text-dim:  #6b7594;
+  --text-mid:  #9ba3bf;
+  --radius:    12px;
+  --shadow:    0 4px 24px rgba(0,0,0,.4);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── BACKGROUND MESH ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 20% 10%, rgba(79,158,255,.07) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(124,92,252,.06) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.app { position: relative; z-index: 1; max-width: 700px; margin: 0 auto; padding: 28px 16px 100px; }
+
+/* ── HEADER ── */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  gap: 12px;
+}
+
+.logo h1 {
+  font-family: 'Lora', serif;
+  font-size: clamp(22px, 4vw, 30px);
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.logo p { font-size: 12px; color: var(--text-dim); margin-top: 3px; font-weight: 300; }
+
+.header-actions { display: flex; gap: 8px; align-items: center; }
+
+.sync-pill {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 20px; padding: 6px 12px;
+  font-size: 11px; color: var(--text-dim);
+}
+
+.dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--success);
+  animation: blink 2.5s infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+.icon-btn {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-mid);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  transition: all .2s;
+}
+.icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+.icon-btn.active { background: rgba(79,158,255,.15); border-color: var(--accent); color: var(--accent); }
+
+/* ── PROXIMITY BANNER ── */
+.proximity-banner {
+  display: none;
+  background: linear-gradient(135deg, rgba(79,158,255,.15), rgba(124,92,252,.15));
+  border: 1px solid rgba(79,158,255,.3);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  animation: fadeIn .3s ease;
+}
+.proximity-banner.show { display: flex; align-items: flex-start; gap: 12px; }
+.proximity-banner .bell { font-size: 22px; flex-shrink: 0; }
+.proximity-banner h3 { font-size: 13px; font-weight: 600; color: var(--accent); margin-bottom: 4px; }
+.proximity-banner ul { list-style: none; }
+.proximity-banner ul li { font-size: 12px; color: var(--text-mid); padding: 2px 0; }
+
+/* ── CARD ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+/* ── ADD FORM ── */
+.add-form { padding: 16px; border-bottom: 1px solid var(--border); }
+
+.main-input-row {
+  display: flex; gap: 8px; margin-bottom: 10px;
+}
+
+.main-input-row input {
+  flex: 1;
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--text);
+  outline: none;
+  transition: border-color .15s;
+}
+.main-input-row input::placeholder { color: var(--text-dim); }
+.main-input-row input:focus { border-color: var(--accent); }
+
+.add-btn {
+  padding: 11px 18px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity .15s, transform .1s;
+}
+.add-btn:hover  { opacity: .9; }
+.add-btn:active { transform: scale(.97); }
+
+/* Location autocomplete row */
+.location-row {
+  position: relative;
+}
+
+.location-row input {
+  width: 100%;
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px 10px 36px;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--text);
+  outline: none;
+  transition: border-color .15s;
+}
+.location-row input::placeholder { color: var(--text-dim); }
+.location-row input:focus { border-color: var(--accent); }
+
+.location-icon {
+  position: absolute; left: 12px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px; pointer-events: none;
+}
+
+/* Google autocomplete dropdown styling */
+.pac-container {
+  background: var(--surface2) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 10px !important;
+  margin-top: 4px !important;
+  box-shadow: var(--shadow) !important;
+  font-family: 'Nunito', sans-serif !important;
+}
+.pac-item {
+  padding: 8px 14px !important;
+  color: var(--text-mid) !important;
+  border-top: 1px solid var(--border) !important;
+  cursor: pointer !important;
+  font-size: 13px !important;
+}
+.pac-item:hover { background: var(--surface) !important; }
+.pac-item-query { color: var(--text) !important; font-weight: 600 !important; }
+.pac-matched { color: var(--accent) !important; }
+.pac-icon { display: none !important; }
+
+/* ── TOOLBAR ── */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.toolbar-label {
+  font-size: 10px;
+  color: var(--text-dim);
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.sort-btn {
+  padding: 5px 11px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  font-family: inherit;
+  font-size: 11px;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all .15s;
+}
+.sort-btn:hover { border-color: var(--accent); color: var(--accent); }
+.sort-btn.active {
+  background: rgba(79,158,255,.12);
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.filter-select {
+  margin-left: auto;
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface2);
+  font-family: inherit;
+  font-size: 11px;
+  color: var(--text-dim);
+  cursor: pointer;
+  outline: none;
+}
+
+/* ── ROUTE BUTTON ── */
+.route-bar {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.route-btn {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 16px;
+  background: rgba(52,211,153,.1);
+  border: 1px solid rgba(52,211,153,.3);
+  border-radius: 10px;
+  color: var(--success);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+}
+.route-btn:hover { background: rgba(52,211,153,.2); }
+
+.route-info {
+  font-size: 11px;
+  color: var(--text-dim);
+  flex: 1;
+}
+
+/* ── LIST ── */
+#oppgaveListe { list-style: none; }
+
+li.oppgave {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  transition: background .1s;
+  animation: fadeIn .2s ease;
+}
+@keyframes fadeIn { from{opacity:0;transform:translateY(-4px)} to{opacity:1;transform:translateY(0)} }
+
+li.oppgave:last-child { border-bottom: none; }
+li.oppgave:hover { background: rgba(255,255,255,.02); }
+
+/* Route number badge */
+.route-num {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* Checkbox */
+.cb-wrap { position: relative; flex-shrink: 0; margin-top: 2px; }
+.cb-wrap input[type="checkbox"] {
+  position: absolute; opacity: 0; width: 20px; height: 20px; cursor: pointer; z-index: 1;
+}
+.cb-box {
+  width: 20px; height: 20px;
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .15s;
+  background: var(--surface2);
+}
+.cb-wrap input:checked + .cb-box {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-color: transparent;
+}
+.cb-check { display: none; color: white; font-size: 11px; font-weight: 700; }
+.cb-wrap input:checked + .cb-box .cb-check { display: block; }
+
+/* Task */
+.task-content { flex: 1; min-width: 0; }
+.task-text {
+  font-size: 14px; line-height: 1.4;
+  color: var(--text);
+  word-break: break-word;
+}
+.oppgave.fullfort .task-text {
+  text-decoration: line-through;
+  color: var(--text-dim);
+}
+
+.task-meta {
+  display: flex; align-items: center; gap: 7px;
+  margin-top: 6px; flex-wrap: wrap;
+}
+
+.meta-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 11px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 2px 8px;
+  color: var(--text-mid);
+}
+
+.meta-chip.location {
+  color: var(--accent);
+  border-color: rgba(79,158,255,.3);
+  background: rgba(79,158,255,.08);
+  cursor: pointer;
+  transition: background .15s;
+}
+.meta-chip.location:hover { background: rgba(79,158,255,.15); }
+
+.meta-chip.nearby {
+  color: var(--success);
+  border-color: rgba(52,211,153,.3);
+  background: rgba(52,211,153,.08);
+  animation: nearbyPulse 2s infinite;
+}
+@keyframes nearbyPulse { 0%,100%{opacity:1} 50%{opacity:.6} }
+
+.task-date { font-size: 11px; color: var(--text-dim); }
+
+.slett-btn {
+  background: none; border: none;
+  color: var(--border);
+  font-size: 18px; cursor: pointer;
+  flex-shrink: 0; padding: 2px 4px;
+  border-radius: 4px; line-height: 1;
+  transition: color .15s, background .15s;
+}
+.slett-btn:hover { color: var(--danger); background: rgba(248,113,113,.1); }
+
+/* ── EMPTY ── */
+.tom-melding {
+  text-align: center;
+  padding: 52px 20px;
+  color: var(--text-dim);
+}
+.tom-melding .ikon { font-size: 40px; margin-bottom: 14px; opacity: .5; }
+.tom-melding p { font-size: 14px; font-weight: 300; }
+
+/* ── STATS ── */
+.stats {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  display: flex; gap: 18px; flex-wrap: wrap;
+}
+.stat { font-size: 11px; color: var(--text-dim); }
+.stat strong { color: var(--text-mid); font-weight: 600; }
+
+/* ── MAP MODAL ── */
+.modal-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(0,0,0,.7);
+  backdrop-filter: blur(4px);
+  align-items: center; justify-content: center;
+  padding: 20px;
+}
+.modal-overlay.show { display: flex; }
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  width: 100%; max-width: 640px;
+  max-height: 85vh;
+  overflow: hidden;
+  display: flex; flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0,0,0,.6);
+  animation: modalIn .25s ease;
+}
+@keyframes modalIn { from{opacity:0;transform:scale(.95)} to{opacity:1;transform:scale(1)} }
+
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.modal-header h2 { font-family: 'Lora', serif; font-size: 18px; color: var(--text); }
+.modal-close {
+  background: none; border: none; color: var(--text-dim);
+  font-size: 22px; cursor: pointer; line-height: 1; padding: 2px;
+  transition: color .15s;
+}
+.modal-close:hover { color: var(--text); }
+
+#mapContainer { flex: 1; min-height: 320px; }
+
+.modal-footer {
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  display: flex; gap: 8px; flex-wrap: wrap;
+}
+
+.modal-btn {
+  padding: 9px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text-mid);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .15s;
+  display: flex; align-items: center; gap: 6px;
+}
+.modal-btn:hover { border-color: var(--accent); color: var(--accent); }
+.modal-btn.primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-color: transparent; color: white;
+}
+.modal-btn.primary:hover { opacity: .9; }
+
+/* ── TOAST ── */
+#toast {
+  position: fixed; bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 13px;
+  pointer-events: none;
+  transition: transform .3s ease;
+  z-index: 999;
+  white-space: nowrap;
+  box-shadow: var(--shadow);
+}
+#toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ── LOCATION STATUS ── */
+#locationStatus {
+  display: none;
+  font-size: 11px;
+  color: var(--warning);
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(251,191,36,.05);
+}
+
+@media (max-width: 480px) {
+  .main-input-row { flex-direction: column; }
+  .add-btn { width: 100%; justify-content: center; }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ── HEADER ── -->
+  <header>
+    <div class="logo">
+      <h1>✦ Huskeliste</h1>
+      <p>Felles liste · synkronisert</p>
+    </div>
+    <div class="header-actions">
+      <div class="sync-pill"><div class="dot"></div><span id="syncStatus">Laster…</span></div>
+      <button class="icon-btn" id="locationBtn" onclick="toggleLocation()" title="Slå på nærhetsvarsler">📍</button>
+      <button class="icon-btn" onclick="åpneKart()" title="Vis kart og rute">🗺️</button>
+    </div>
+  </header>
+
+  <!-- ── PROXIMITY BANNER ── -->
+  <div class="proximity-banner" id="proximityBanner">
+    <div class="bell">🔔</div>
+    <div>
+      <h3>Du er i nærheten!</h3>
+      <ul id="proximityList"></ul>
+    </div>
+  </div>
+
+  <!-- ── MAIN CARD ── -->
+  <div class="card">
+
+    <!-- Legg til form -->
+    <div class="add-form">
+      <div class="main-input-row">
+        <input type="text" id="oppgaveFelt" placeholder="Ny oppgave…" />
+        <button class="add-btn" onclick="leggTilOppgave()">+ Legg til</button>
+      </div>
+      <div class="location-row">
+        <span class="location-icon">📍</span>
+        <input type="text" id="stedFelt" placeholder="Søk etter sted (f.eks. Coop, IKEA, Apotek…)" />
+      </div>
+    </div>
+
+    <!-- Location warning -->
+    <div id="locationStatus">⚠️ Tillat stedstilgang i nettleseren for nærhetsvarsler og rute fra din posisjon.</div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <span class="toolbar-label">Sorter:</span>
+      <button class="sort-btn active" id="sort-ny"   onclick="setSortering('ny')">Nyeste ↓</button>
+      <button class="sort-btn"        id="sort-gl"   onclick="setSortering('gl')">Eldste ↑</button>
+      <button class="sort-btn"        id="sort-az"   onclick="setSortering('az')">A–Å</button>
+      <button class="sort-btn"        id="sort-sted" onclick="setSortering('sted')">Sted</button>
+      <select class="filter-select" id="filterSelect" onchange="visOppgaver()">
+        <option value="">Alle steder</option>
+      </select>
+    </div>
+
+    <!-- Route bar -->
+    <div class="route-bar" id="routeBar" style="display:none">
+      <button class="route-btn" onclick="åpneKart()">
+        🧭 <span>Vis optimal reiserute</span>
+      </button>
+      <div class="route-info" id="routeInfo"></div>
+    </div>
+
+    <!-- Liste -->
+    <ul id="oppgaveListe">
+      <li class="tom-melding"><div class="ikon">⏳</div><p>Laster liste…</p></li>
+    </ul>
+
+    <!-- Stats -->
+    <div class="stats" id="stats"></div>
+  </div>
+
+</div><!-- /app -->
+
+<!-- ── MAP MODAL ── -->
+<div class="modal-overlay" id="mapModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>🗺️ Reiserute</h2>
+      <button class="modal-close" onclick="lukkKart()">×</button>
+    </div>
+    <div id="mapContainer"></div>
+    <div class="modal-footer">
+      <button class="modal-btn" onclick="lukkKart()">Lukk</button>
+      <button class="modal-btn primary" id="openGmapsBtn" onclick="åpneIGoogleMaps()">
+        Åpne i Google Maps →
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<!-- ════════════════════════════════════════════
+     GOOGLE MAPS – bytt ut AIzaSyDG6BTmvFXCTD-2xrU8y-LdAMxqcG8VsnU
+════════════════════════════════════════════ -->
+<script>
+  // ╔══════════════════════════════════════╗
+  // ║  LINJE DU SKAL REDIGERE:            ║
+  // ║  Bytt ut AIzaSyDG6BTmvFXCTD-2xrU8y-LdAMxqcG8VsnU             ║
+  // ║  med din Google Maps API-nøkkel     ║
+  // ╚══════════════════════════════════════╝
+  window.MAPS_API_KEY = 'AIzaSyDG6BTmvFXCTD-2xrU8y-LdAMxqcG8VsnU';
+</script>
+<script>
+// ════════════════════════════════════════════
+// KONFIGURASJON
+// ════════════════════════════════════════════
+const STORAGE_KEY    = 'felles-huskeliste-v3';
+const NÆRHET_METER   = 300; // Varsle når brukeren er innenfor 300 meter
+
+let oppgaver        = [];
+let sortering       = 'ny';
+let retning         = { ny:'desc', gl:'asc', az:'asc', sted:'asc' };
+let brukerPosisjon  = null;
+let posisjonTimer   = null;
+let googleKlar      = false;
+let autocomplete    = null;
+let mapInstance     = null;
+let directionsRenderer = null;
+let valgtSted       = null; // { name, lat, lng, placeId }
+
+// ════════════════════════════════════════════
+// GOOGLE MAPS INIT (kalles av SDK)
+// ════════════════════════════════════════════
+function initMaps() {
+  googleKlar = true;
+
+  // Autocomplete på stedsfeltet
+  const stedInput = document.getElementById('stedFelt');
+  autocomplete = new google.maps.places.Autocomplete(stedInput, {
+    types: ['establishment', 'geocode'],
+    componentRestrictions: { country: 'no' },
+    fields: ['name', 'geometry', 'place_id', 'formatted_address']
+  });
+
+  autocomplete.addListener('place_changed', () => {
+    const place = autocomplete.getPlace();
+    if (!place.geometry) return;
+    valgtSted = {
+      name:    place.name,
+      adresse: place.formatted_address || place.name,
+      lat:     place.geometry.location.lat(),
+      lng:     place.geometry.location.lng(),
+      placeId: place.place_id
+    };
+  });
+
+  // Nullstill valgtSted hvis brukeren endrer teksten manuelt
+  stedInput.addEventListener('input', () => { valgtSted = null; });
+}
+
+// Last inn Google Maps SDK dynamisk
+function lastMapsSDK() {
+  if (!window.MAPS_API_KEY || window.MAPS_API_KEY === 'AIzaSyDG6BTmvFXCTD-2xrU8y-LdAMxqcG8VsnU') {
+    visToast('⚠️ Legg inn Google Maps API-nøkkel i koden');
+    return;
+  }
+  const s = document.createElement('script');
+  s.src = `https://maps.googleapis.com/maps/api/js?key=${window.MAPS_API_KEY}&libraries=places,geometry&callback=initMaps`;
+  s.async = true; s.defer = true;
+  document.head.appendChild(s);
+}
+
+// ════════════════════════════════════════════
+// LAGRING (delt, synkronisert)
+// ════════════════════════════════════════════
+async function hentFraLager() {
+  try {
+    const res = await window.storage.get(STORAGE_KEY, true);
+    oppgaver = res ? JSON.parse(res.value) : [];
+    document.getElementById('syncStatus').textContent = 'Synkronisert';
+  } catch(e) {
+    oppgaver = [];
+    document.getElementById('syncStatus').textContent = 'Lokal';
+  }
+  visOppgaver();
+  sjekkNærhet();
+}
+
+async function lagreTilLager() {
+  try {
+    await window.storage.set(STORAGE_KEY, JSON.stringify(oppgaver), true);
+    visToast('Lagret ✓');
+  } catch(e) { visToast('Lagringsfeil'); }
+}
+
+// ════════════════════════════════════════════
+// LEGG TIL OPPGAVE
+// ════════════════════════════════════════════
+async function leggTilOppgave() {
+  const oppgFelt = document.getElementById('oppgaveFelt');
+  const tekst    = oppgFelt.value.trim();
+  if (!tekst) { oppgFelt.focus(); return; }
+
+  const stedTekst = document.getElementById('stedFelt').value.trim();
+
+  oppgaver.push({
+    id:        Date.now(),
+    tekst:     tekst,
+    sted:      valgtSted ? valgtSted.name    : stedTekst,
+    adresse:   valgtSted ? valgtSted.adresse : stedTekst,
+    lat:       valgtSted ? valgtSted.lat     : null,
+    lng:       valgtSted ? valgtSted.lng     : null,
+    placeId:   valgtSted ? valgtSted.placeId : null,
+    fullfort:  false,
+    opprettet: new Date().toISOString()
+  });
+
+  oppgFelt.value = '';
+  document.getElementById('stedFelt').value = '';
+  valgtSted = null;
+  oppgFelt.focus();
+
+  visOppgaver();
+  await lagreTilLager();
+}
+
+// ════════════════════════════════════════════
+// TOGGLE / SLETT
+// ════════════════════════════════════════════
+async function toggleFullfort(id) {
+  oppgaver = oppgaver.map(o => o.id === id ? {...o, fullfort: !o.fullfort} : o);
+  visOppgaver();
+  await lagreTilLager();
+}
+
+async function slettOppgave(id) {
+  oppgaver = oppgaver.filter(o => o.id !== id);
+  visOppgaver();
+  await lagreTilLager();
+}
+
+// ════════════════════════════════════════════
+// GEOLOKASJON OG NÆRHETSVARSLER
+// ════════════════════════════════════════════
+function toggleLocation() {
+  if (posisjonTimer) {
+    clearInterval(posisjonTimer);
+    posisjonTimer = null;
+    brukerPosisjon = null;
+    document.getElementById('locationBtn').classList.remove('active');
+    document.getElementById('proximityBanner').classList.remove('show');
+    visToast('Nærhetsvarsler av');
+  } else {
+    startLocation();
+  }
+}
+
+function startLocation() {
+  if (!navigator.geolocation) {
+    document.getElementById('locationStatus').style.display = 'block';
+    return;
+  }
+  document.getElementById('locationBtn').classList.add('active');
+  visToast('📍 Henter posisjon…');
+
+  const opsjoner = { enableHighAccuracy: true, maximumAge: 30000 };
+
+  navigator.geolocation.getCurrentPosition(pos => {
+    oppdaterPosisjon(pos);
+    // Sjekk hvert 30. sekund
+    posisjonTimer = setInterval(() => {
+      navigator.geolocation.getCurrentPosition(oppdaterPosisjon, null, opsjoner);
+    }, 30000);
+  }, () => {
+    document.getElementById('locationStatus').style.display = 'block';
+    document.getElementById('locationBtn').classList.remove('active');
+  }, opsjoner);
+}
+
+function oppdaterPosisjon(pos) {
+  brukerPosisjon = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+  sjekkNærhet();
+  oppdaterRouteBar();
+}
+
+function avstand(lat1, lng1, lat2, lng2) {
+  // Haversine-formel for avstand i meter mellom to koordinater
+  const R  = 6371000;
+  const φ1 = lat1 * Math.PI/180;
+  const φ2 = lat2 * Math.PI/180;
+  const Δφ = (lat2-lat1) * Math.PI/180;
+  const Δλ = (lng2-lng1) * Math.PI/180;
+  const a  = Math.sin(Δφ/2)**2 + Math.cos(φ1)*Math.cos(φ2)*Math.sin(Δλ/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function sjekkNærhet() {
+  if (!brukerPosisjon) return;
+
+  const nære = oppgaver.filter(o =>
+    !o.fullfort && o.lat && o.lng &&
+    avstand(brukerPosisjon.lat, brukerPosisjon.lng, o.lat, o.lng) <= NÆRHET_METER
+  );
+
+  const banner = document.getElementById('proximityBanner');
+  const liste  = document.getElementById('proximityList');
+
+  if (nære.length > 0) {
+    liste.innerHTML = nære.map(o => {
+      const m = Math.round(avstand(brukerPosisjon.lat, brukerPosisjon.lng, o.lat, o.lng));
+      return `<li>· ${escHtml(o.tekst)} <span style="color:var(--accent)">(${o.sted}, ${m}m unna)</span></li>`;
+    }).join('');
+    banner.classList.add('show');
+  } else {
+    banner.classList.remove('show');
+  }
+
+  visOppgaver(); // Oppdater "nærby"-chips
+}
+
+// ════════════════════════════════════════════
+// KART OG REISERUTE
+// ════════════════════════════════════════════
+function oppdaterRouteBar() {
+  const medKoord = oppgaver.filter(o => !o.fullfort && o.lat && o.lng);
+  const bar = document.getElementById('routeBar');
+  const info = document.getElementById('routeInfo');
+
+  if (medKoord.length >= 1) {
+    bar.style.display = 'flex';
+    info.textContent = `${medKoord.length} sted${medKoord.length > 1 ? 'er' : ''} med koordinater`;
+  } else {
+    bar.style.display = 'none';
+  }
+}
+
+function åpneKart() {
+  if (!googleKlar) {
+    visToast('⚠️ Google Maps ikke lastet – sjekk API-nøkkel');
+    return;
+  }
+
+  const medKoord = oppgaver.filter(o => !o.fullfort && o.lat && o.lng);
+  if (medKoord.length === 0) {
+    visToast('Ingen oppgaver med stedsdata å vise');
+    return;
+  }
+
+  document.getElementById('mapModal').classList.add('show');
+
+  // Vent litt før vi init kart (modal må være synlig)
+  setTimeout(() => byggKart(medKoord), 100);
+}
+
+function lukkKart() {
+  document.getElementById('mapModal').classList.remove('show');
+}
+
+function byggKart(steder) {
+  const container = document.getElementById('mapContainer');
+  container.innerHTML = ''; // Nullstill
+
+  // Sentrer på første punkt eller brukerposisjon
+  const senter = brukerPosisjon || { lat: steder[0].lat, lng: steder[0].lng };
+
+  mapInstance = new google.maps.Map(container, {
+    center: senter,
+    zoom: 13,
+    styles: nattKartStyles(),
+    disableDefaultUI: false,
+    zoomControl: true,
+    mapTypeControl: false,
+    streetViewControl: false,
+    fullscreenControl: false
+  });
+
+  // Brukerposisjon
+  if (brukerPosisjon) {
+    new google.maps.Marker({
+      position: brukerPosisjon,
+      map: mapInstance,
+      title: 'Din posisjon',
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 9,
+        fillColor: '#4f9eff',
+        fillOpacity: 1,
+        strokeColor: '#fff',
+        strokeWeight: 2
+      }
+    });
+  }
+
+  if (steder.length === 1 || !brukerPosisjon) {
+    // Bare vis markører uten rute
+    steder.forEach((o, i) => {
+      const marker = new google.maps.Marker({
+        position: { lat: o.lat, lng: o.lng },
+        map: mapInstance,
+        title: o.sted,
+        label: { text: String(i+1), color: 'white', fontWeight: 'bold', fontSize: '11px' },
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 16,
+          fillColor: '#7c5cfc',
+          fillOpacity: 1,
+          strokeColor: '#fff',
+          strokeWeight: 2
+        }
+      });
+
+      const infoWindow = new google.maps.InfoWindow({
+        content: `<div style="font-family:Nunito,sans-serif;padding:4px 2px">
+          <strong>${escHtml(o.sted)}</strong><br>
+          <span style="font-size:12px;color:#666">${escHtml(o.tekst)}</span>
+        </div>`
+      });
+      marker.addListener('click', () => infoWindow.open(mapInstance, marker));
+    });
+  } else {
+    // Beregn optimal reiserute med Directions API (waypoints optimalisert)
+    const directionsService = new google.maps.DirectionsService();
+    directionsRenderer = new google.maps.DirectionsRenderer({
+      map: mapInstance,
+      suppressMarkers: false,
+      polylineOptions: {
+        strokeColor: '#4f9eff',
+        strokeWeight: 4,
+        strokeOpacity: .8
+      }
+    });
+
+    const waypoints = steder.slice(0, -1).map(o => ({
+      location: new google.maps.LatLng(o.lat, o.lng),
+      stopover: true
+    }));
+
+    const request = {
+      origin:      brukerPosisjon
+                     ? new google.maps.LatLng(brukerPosisjon.lat, brukerPosisjon.lng)
+                     : new google.maps.LatLng(steder[0].lat, steder[0].lng),
+      destination: new google.maps.LatLng(steder[steder.length-1].lat, steder[steder.length-1].lng),
+      waypoints:   brukerPosisjon ? waypoints : waypoints.slice(1),
+      optimizeWaypoints: true,   // ← Google optimaliserer rekkefølgen
+      travelMode: google.maps.TravelMode.DRIVING
+    };
+
+    directionsService.route(request, (result, status) => {
+      if (status === 'OK') {
+        directionsRenderer.setDirections(result);
+
+        // Vis total distanse og tid
+        const legs = result.routes[0].legs;
+        const totDist = legs.reduce((s, l) => s + l.distance.value, 0);
+        const totTid  = legs.reduce((s, l) => s + l.duration.value, 0);
+        const km  = (totDist/1000).toFixed(1);
+        const min = Math.round(totTid/60);
+        document.getElementById('routeInfo').textContent =
+          `Optimal rute: ${km} km · ca. ${min} min kjøring`;
+      } else {
+        visToast('Kunne ikke beregne rute: ' + status);
+      }
+    });
+  }
+}
+
+function åpneIGoogleMaps() {
+  const medKoord = oppgaver.filter(o => !o.fullfort && o.lat && o.lng);
+  if (medKoord.length === 0) return;
+
+  let url;
+  if (medKoord.length === 1) {
+    url = `https://www.google.com/maps/search/?api=1&query=${medKoord[0].lat},${medKoord[0].lng}`;
+  } else {
+    // Bygg rute-URL for Google Maps
+    const origin = brukerPosisjon
+      ? `${brukerPosisjon.lat},${brukerPosisjon.lng}`
+      : `${medKoord[0].lat},${medKoord[0].lng}`;
+    const dest   = `${medKoord[medKoord.length-1].lat},${medKoord[medKoord.length-1].lng}`;
+    const stops  = medKoord.slice(1,-1).map(o => `${o.lat},${o.lng}`).join('|');
+    url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest}${stops ? '&waypoints='+stops : ''}&travelmode=driving`;
+  }
+  window.open(url, '_blank');
+}
+
+// ════════════════════════════════════════════
+// VIS OPPGAVER
+// ════════════════════════════════════════════
+function visOppgaver() {
+  const liste  = document.getElementById('oppgaveListe');
+  const stats  = document.getElementById('stats');
+  const filter = document.getElementById('filterSelect').value;
+
+  oppdaterStedFilter();
+  oppdaterRouteBar();
+
+  let vis = filter ? oppgaver.filter(o => o.sted === filter) : oppgaver;
+  vis = sortertListe(vis);
+  vis.sort((a,b) => Number(a.fullfort) - Number(b.fullfort));
+
+  if (vis.length === 0) {
+    liste.innerHTML = `
+      <li class="tom-melding">
+        <div class="ikon">🛒</div>
+        <p>${filter ? 'Ingen oppgaver på dette stedet' : 'Listen er tom – legg til noe!'}</p>
+      </li>`;
+    stats.innerHTML = '';
+    return;
+  }
+
+  liste.innerHTML = vis.map((o, idx) => {
+    const dato  = new Date(o.opprettet).toLocaleDateString('no-NO', {day:'numeric', month:'short'});
+    const nær   = brukerPosisjon && o.lat && o.lng &&
+                  avstand(brukerPosisjon.lat, brukerPosisjon.lng, o.lat, o.lng) <= NÆRHET_METER;
+    const nærM  = nær ? Math.round(avstand(brukerPosisjon.lat, brukerPosisjon.lng, o.lat, o.lng)) : 0;
+
+    return `
+      <li class="oppgave ${o.fullfort ? 'fullfort' : ''}">
+        ${o.lat ? `<div class="route-num">${idx+1}</div>` : ''}
+        <label class="cb-wrap">
+          <input type="checkbox" ${o.fullfort ? 'checked' : ''} onchange="toggleFullfort(${o.id})" />
+          <div class="cb-box"><span class="cb-check">✓</span></div>
+        </label>
+        <div class="task-content">
+          <div class="task-text">${escHtml(o.tekst)}</div>
+          <div class="task-meta">
+            ${o.sted ? `
+              <span class="meta-chip location" onclick="visStedPåKart(${o.id})" title="${escHtml(o.adresse||o.sted)}">
+                📍 ${escHtml(o.sted)}
+              </span>` : ''}
+            ${nær ? `<span class="meta-chip nearby">🔔 ${nærM}m unna</span>` : ''}
+            <span class="task-date">${dato}</span>
+          </div>
+        </div>
+        <button class="slett-btn" onclick="slettOppgave(${o.id})" title="Slett">×</button>
+      </li>`;
+  }).join('');
+
+  const totalt   = oppgaver.length;
+  const fullfort = oppgaver.filter(o => o.fullfort).length;
+  const medSted  = oppgaver.filter(o => o.lat).length;
+  stats.innerHTML = `
+    <div class="stat"><strong>${totalt - fullfort}</strong> gjenstår</div>
+    <div class="stat"><strong>${fullfort}</strong> fullført</div>
+    <div class="stat"><strong>${medSted}</strong> med kartdata</div>
+  `;
+}
+
+function visStedPåKart(id) {
+  const o = oppgaver.find(x => x.id === id);
+  if (!o || !o.lat) { visToast('Ingen koordinater for dette stedet'); return; }
+  åpneKart();
+}
+
+// ════════════════════════════════════════════
+// SORTERING
+// ════════════════════════════════════════════
+function setSortering(type) {
+  if (sortering === type) {
+    retning[type] = retning[type] === 'asc' ? 'desc' : 'asc';
+  } else {
+    sortering = type;
+  }
+  document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('sort-' + type).classList.add('active');
+  visOppgaver();
+}
+
+function sortertListe(liste) {
+  return [...liste].sort((a, b) => {
+    const r = retning[sortering] === 'asc' ? 1 : -1;
+    if (sortering === 'ny') return -(a.id - b.id);
+    if (sortering === 'gl') return  (a.id - b.id);
+    if (sortering === 'az') return r * a.tekst.localeCompare(b.tekst, 'no');
+    if (sortering === 'sted') {
+      return r * (a.sted||'ÿ').localeCompare(b.sted||'ÿ', 'no');
+    }
+    return 0;
+  });
+}
+
+// ════════════════════════════════════════════
+// HJELPEFUNKSJONER
+// ════════════════════════════════════════════
+function oppdaterStedFilter() {
+  const sel   = document.getElementById('filterSelect');
+  const valgt = sel.value;
+  const steder = [...new Set(oppgaver.filter(o => o.sted).map(o => o.sted))].sort();
+  sel.innerHTML = '<option value="">Alle steder</option>' +
+    steder.map(s => `<option ${s===valgt?'selected':''} value="${escHtml(s)}">${escHtml(s)}</option>`).join('');
+}
+
+function escHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+let toastTimer;
+function visToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// Mørkt karttema
+function nattKartStyles() {
+  return [
+    {elementType:'geometry',stylers:[{color:'#1a1f35'}]},
+    {elementType:'labels.text.fill',stylers:[{color:'#6b7594'}]},
+    {elementType:'labels.text.stroke',stylers:[{color:'#1a1f35'}]},
+    {featureType:'road',elementType:'geometry',stylers:[{color:'#252d4a'}]},
+    {featureType:'road',elementType:'geometry.stroke',stylers:[{color:'#1a1f35'}]},
+    {featureType:'road',elementType:'labels.text.fill',stylers:[{color:'#9ba3bf'}]},
+    {featureType:'road.highway',elementType:'geometry',stylers:[{color:'#2c3560'}]},
+    {featureType:'water',elementType:'geometry',stylers:[{color:'#0f1525'}]},
+    {featureType:'water',elementType:'labels.text.fill',stylers:[{color:'#3d5875'}]},
+    {featureType:'poi',elementType:'geometry',stylers:[{color:'#1f2840'}]},
+    {featureType:'poi.park',elementType:'geometry',stylers:[{color:'#162428'}]},
+    {featureType:'transit',elementType:'geometry',stylers:[{color:'#1f2840'}]},
+    {featureType:'administrative',elementType:'geometry',stylers:[{color:'#2c3560'}]},
+  ];
+}
+
+// ════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════
+document.getElementById('oppgaveFelt').addEventListener('keydown', e => {
+  if (e.key === 'Enter') leggTilOppgave();
+});
+
+// Lukk modal ved klikk utenfor
+document.getElementById('mapModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('mapModal')) lukkKart();
+});
+
+// Start
+lastMapsSDK();
+hentFraLager();
+setInterval(hentFraLager, 8000); // Synkroniser hvert 8. sekund
+</script>
+
+</body>
+</html>
